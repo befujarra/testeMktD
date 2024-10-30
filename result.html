@@ -11,7 +11,14 @@
     <div class="container text-center mt-5">
         <h1 id="result-message">Parabéns!</h1>
         <p id="score-message"></p>
-        <button class="btn btn-primary" onclick="restartQuiz()">Reiniciar Quiz</button>
+
+        <!-- Section for displaying correct answers breakdown by difficulty level -->
+        <div id="correct-answers-breakdown" class="mt-4"></div>
+
+        <!-- Section for displaying incorrect questions -->
+        <div id="incorrect-questions" class="mt-5"></div>
+
+        <button class="btn btn-primary mt-3" onclick="restartQuiz()">Reiniciar Quiz</button>
     </div>
     <script src="script.js"></script>
 </body>

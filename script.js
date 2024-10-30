@@ -1,5 +1,9 @@
+let selectedQuestions = [];
+
 function startQuiz() {
+   
     window.location.href = 'quiz.html';
+   
 }
 
 function getRandomQuestions() {
@@ -58,29 +62,74 @@ function finishQuiz() {
         alert("Por favor, responda todas as questões antes de finalizar.");
         return;
     }
-
-    const selectedQuestions = getRandomQuestions();
+    selectedQuestions = getRandomQuestions();
+    console.log(selectedQuestions)
     let score = 0;
+    let correctAnswers = { Fácil: 0, Média: 0, Difícil: 0 }; // Definindo correctAnswers
+    let incorrectQuestions = [];
+
     selectedQuestions.forEach((question, index) => {
         const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
-        if (selectedOption && parseInt(selectedOption.value) === question.answer) {
+        const isCorrect = selectedOption && parseInt(selectedOption.value) === question.answer;
+        if (isCorrect) {
             score += question.points;
+            correctAnswers[question.level]++;
+        } else {
+            incorrectQuestions.push({
+                question: question.text,
+                selectedAnswer: selectedOption ? selectedOption.value : null,
+                correctAnswer: question.answer,
+                options: question.options,
+                level: question.level
+            });
         }
     });
 
-    // Salva a pontuação no localStorage e redireciona para a página de resultado
+    // Salva os resultados no localStorage
     localStorage.setItem('quizScore', score);
+    localStorage.setItem('correctAnswers', JSON.stringify(correctAnswers));
+    localStorage.setItem('incorrectQuestions', JSON.stringify(incorrectQuestions));
     window.location.href = 'result.html';
 }
 
+
 function displayResult() {
     const score = localStorage.getItem('quizScore');
+    const correctAnswers = JSON.parse(localStorage.getItem('correctAnswers'));
+    const incorrectQuestions = JSON.parse(localStorage.getItem('incorrectQuestions'));
+
     if (score !== null) {
         const scoreMessage = document.getElementById('score-message');
-        scoreMessage.textContent = `Parabéns, você acertou: ${score} pontos`;
+        scoreMessage.textContent = `Você acertou: ${score} pontos`;
+
+        // Display correct answers breakdown
+        const resultMessage = document.getElementById('result-message');
+        resultMessage.innerHTML = `
+            <p>Acertos por dificuldade:</p>
+            <ul>
+                <li>Fácil: ${correctAnswers.Fácil} questões</li>
+                <li>Média: ${correctAnswers.Média} questões</li>
+                <li>Difícil: ${correctAnswers.Difícil} questões</li>
+            </ul>
+        `;
+
+        // Display incorrect questions
+        if (incorrectQuestions.length > 0) {
+            const incorrectContainer = document.createElement('div');
+            incorrectContainer.innerHTML = '<h3>Questões Incorretas:</h3>';
+            incorrectQuestions.forEach((item, index) => {
+                incorrectContainer.innerHTML += `
+                    <div class="mb-3">
+                        <strong>${index + 1}. ${item.level} - ${item.question}</strong>
+                        <p>Resposta correta: ${item.options[item.correctAnswer]}</p>
+                        <p>Sua resposta: ${item.selectedAnswer !== null ? item.options[item.selectedAnswer] : 'Não respondida'}</p>
+                    </div>
+                `;
+            });
+            document.body.appendChild(incorrectContainer);
+        }
     }
 }
-
 function restartQuiz() {
     window.location.href = 'index.html';
 }
